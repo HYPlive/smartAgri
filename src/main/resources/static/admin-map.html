@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="lib/css/font-awesome.min.css"/>
 
     <link rel="stylesheet" href="css/admin-map.css"/>
+    <link rel="stylesheet" href="css/ai-chat.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
 
@@ -1636,6 +1638,15 @@
     }
 </style>
 
+<script src="js/admin-ai-chat.js"></script>
+<script>
+    window.AdminAiChat && window.AdminAiChat.init({
+        title: "AI 农业助手",
+        sessionId: "admin-map-ai-" + Date.now(),
+        placeholder: "输入问题，如：筛选适合玉米的壤土地块"
+    });
+</script>
 
 </body>
 </html>
+

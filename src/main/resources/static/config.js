@@ -1,4 +1,4 @@
 var gloableConfig = {
-    "key": "mykey", // 高德地图的key（配合秘钥使用的key）开发环境使用
-    "secretKey": "f68e536cdfd78edbcd2d05945befb273", // 高德地图的秘钥（配合key使用的秘钥）开发环境使用
+    "key": "YOUR_AMAP_KEY", // 高德地图 Web Key，部署前替换为你自己的 key
+    "secretKey": "YOUR_AMAP_SECRET_KEY", // 高德地图安全密钥，部署前替换为你自己的 securityJsCode
 };

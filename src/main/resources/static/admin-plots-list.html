@@ -9,9 +9,12 @@
           content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
     <link rel="stylesheet" href="./css/font.css">
     <link rel="stylesheet" href="./css/xadmin.css">
+    <link rel="stylesheet" href="./lib/css/font-awesome.min.css">
+    <link rel="stylesheet" href="./css/ai-chat.css">
     <script src="./lib/layui/layui.js" charset="utf-8"></script>
     <script type="text/javascript" src="./js/xadmin.js"></script>
     <script src="./js/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <!-- Leaflet 样式和脚本 -->
     <link rel="stylesheet" href="./lib/css/leaflet.css"/>
@@ -442,5 +445,14 @@
         document.body.removeChild(a);
     }
 </script>
+<script src="./js/admin-ai-chat.js"></script>
+<script>
+    window.AdminAiChat && window.AdminAiChat.init({
+        title: "AI 农业助手",
+        sessionId: "admin-plots-list-ai-" + Date.now(),
+        placeholder: "输入问题，如：统计一下各地区地块面积"
+    });
+</script>
 </body>
 </html>
+
