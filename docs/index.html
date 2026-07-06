@@ -7,350 +7,101 @@
   <meta name="description" content="农田智能监测与巡田决策平台：基于 Spring Boot、MySQL、Leaflet、Cesium、Python Flask 与 AI Agent 的精准农业项目展示。">
   <style>
     :root {
-      --bg: #f5f7f3;
-      --ink: #17211b;
-      --muted: #5b6a60;
-      --line: #d8dfd6;
-      --panel: #ffffff;
-      --panel-soft: #edf3ee;
-      --green: #2f7d4c;
-      --green-dark: #1f5d3b;
-      --cyan: #247f8f;
-      --amber: #b66b24;
-      --shadow: 0 18px 50px rgba(31, 66, 43, .14);
+      --bg: #f5f7f3; --ink: #17211b; --muted: #5b6a60; --line: #d8dfd6;
+      --panel: #ffffff; --panel-soft: #edf3ee; --green: #2f7d4c; --green-dark: #1f5d3b;
+      --cyan: #247f8f; --amber: #b66b24; --red: #b8483a; --shadow: 0 18px 50px rgba(31, 66, 43, .14);
     }
-
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      font-family: Inter, "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
-      color: var(--ink);
-      background: var(--bg);
-      line-height: 1.65;
-    }
-
+    body { margin: 0; font-family: Inter, "Microsoft YaHei", "PingFang SC", Arial, sans-serif; color: var(--ink); background: var(--bg); line-height: 1.65; }
     a { color: inherit; text-decoration: none; }
     img { max-width: 100%; display: block; }
-
-    .nav {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-      padding: 14px clamp(18px, 4vw, 64px);
-      border-bottom: 1px solid rgba(216, 223, 214, .82);
-      background: rgba(245, 247, 243, .88);
-      backdrop-filter: blur(16px);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 800;
-      letter-spacing: 0;
-    }
-
-    .brand-mark {
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, var(--green), var(--cyan));
-      display: grid;
-      place-items: center;
-      color: white;
-      font-size: 18px;
-      font-weight: 900;
-    }
-
-    .nav-links {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 16px;
-      font-size: 14px;
-      color: var(--muted);
-    }
-
+    .nav { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 14px clamp(18px, 4vw, 64px); border-bottom: 1px solid rgba(216, 223, 214, .82); background: rgba(245, 247, 243, .9); backdrop-filter: blur(16px); }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: 0; }
+    .brand-mark { width: 34px; height: 34px; border-radius: 8px; background: linear-gradient(135deg, var(--green), var(--cyan)); display: grid; place-items: center; color: white; font-size: 18px; font-weight: 900; }
+    .nav-links { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 16px; font-size: 14px; color: var(--muted); }
     .nav-links a:hover { color: var(--green-dark); }
-
-    .hero {
-      min-height: 88vh;
-      display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr);
-      align-items: center;
-      gap: clamp(28px, 5vw, 72px);
-      padding: clamp(48px, 7vw, 92px) clamp(18px, 4vw, 64px) 38px;
-      background:
-        linear-gradient(90deg, rgba(245,247,243,.94) 0%, rgba(245,247,243,.72) 46%, rgba(245,247,243,.42) 100%),
-        url("images/原始影像(沽源县).png") center / cover no-repeat;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--green-dark);
-      font-weight: 800;
-      font-size: 14px;
-      margin-bottom: 18px;
-    }
-
-    .eyebrow::before {
-      content: "";
-      width: 32px;
-      height: 2px;
-      background: var(--green);
-    }
-
-    h1 {
-      margin: 0;
-      max-width: 760px;
-      font-size: clamp(36px, 6vw, 74px);
-      line-height: 1.05;
-      letter-spacing: 0;
-    }
-
-    .hero-subtitle {
-      max-width: 720px;
-      margin: 24px 0 0;
-      color: #34453a;
-      font-size: clamp(17px, 2vw, 22px);
-    }
-
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 30px;
-    }
-
-    .button {
-      min-height: 44px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 18px;
-      border-radius: 8px;
-      border: 1px solid var(--green);
-      font-weight: 800;
-      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
-    }
-
-    .button.primary {
-      color: #fff;
-      background: var(--green);
-      box-shadow: 0 14px 28px rgba(47, 125, 76, .2);
-    }
-
+    .hero { min-height: 88vh; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr); align-items: center; gap: clamp(28px, 5vw, 72px); padding: clamp(48px, 7vw, 92px) clamp(18px, 4vw, 64px) 38px; background: linear-gradient(90deg, rgba(245,247,243,.95), rgba(245,247,243,.72) 48%, rgba(245,247,243,.42)), url("images/原始影像(沽源县).png") center / cover no-repeat; border-bottom: 1px solid var(--line); }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--green-dark); font-weight: 800; font-size: 14px; margin-bottom: 18px; }
+    .eyebrow::before { content: ""; width: 32px; height: 2px; background: var(--green); }
+    h1 { margin: 0; max-width: 760px; font-size: clamp(36px, 6vw, 74px); line-height: 1.05; letter-spacing: 0; }
+    .hero-subtitle { max-width: 760px; margin: 24px 0 0; color: #34453a; font-size: clamp(17px, 2vw, 22px); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+    .button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 18px; border-radius: 8px; border: 1px solid var(--green); font-weight: 800; transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
+    .button.primary { color: #fff; background: var(--green); box-shadow: 0 14px 28px rgba(47, 125, 76, .2); }
     .button.secondary { background: rgba(255, 255, 255, .72); color: var(--green-dark); }
     .button:hover { transform: translateY(-2px); }
-
-    .hero-panel {
-      align-self: stretch;
-      display: grid;
-      align-content: end;
-      gap: 14px;
-    }
-
-    .screen-frame {
-      border: 1px solid rgba(216, 223, 214, .85);
-      border-radius: 8px;
-      overflow: hidden;
-      background: #fff;
-      box-shadow: var(--shadow);
-    }
-
-    .screen-frame img {
-      width: 100%;
-      aspect-ratio: 16 / 10;
-      object-fit: cover;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .stat {
-      border: 1px solid rgba(216, 223, 214, .86);
-      border-radius: 8px;
-      background: rgba(255, 255, 255, .84);
-      padding: 14px;
-    }
-
+    .screen-frame { border: 1px solid rgba(216, 223, 214, .85); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: var(--shadow); }
+    .screen-frame img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+    .stat { border: 1px solid rgba(216, 223, 214, .86); border-radius: 8px; background: rgba(255, 255, 255, .84); padding: 14px; }
     .stat strong { display: block; font-size: 22px; color: var(--green-dark); line-height: 1.1; }
     .stat span { display: block; margin-top: 4px; font-size: 13px; color: var(--muted); }
-
-    .section {
-      padding: clamp(48px, 7vw, 86px) clamp(18px, 4vw, 64px);
-    }
-
+    .section { padding: clamp(48px, 7vw, 86px) clamp(18px, 4vw, 64px); }
     .section.alt { background: #fff; }
-    .section-head { max-width: 780px; margin-bottom: 30px; }
+    .section-head { max-width: 840px; margin-bottom: 30px; }
     .section-kicker { margin: 0 0 8px; color: var(--green-dark); font-weight: 900; font-size: 14px; }
     h2 { margin: 0; font-size: clamp(26px, 4vw, 42px); line-height: 1.18; letter-spacing: 0; }
     .section-head p { margin: 14px 0 0; color: var(--muted); font-size: 17px; }
-
     .grid { display: grid; gap: 18px; }
-    .grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-
-    .card {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--panel);
-      padding: 22px;
-      box-shadow: 0 10px 28px rgba(31, 66, 43, .06);
-    }
-
+    .cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .card { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); padding: 22px; box-shadow: 0 10px 28px rgba(31, 66, 43, .06); }
     .card h3 { margin: 0 0 8px; font-size: 20px; line-height: 1.3; }
     .card p { margin: 0; color: var(--muted); }
     .num { color: var(--amber); font-weight: 900; font-size: 13px; }
-
-    .pipeline {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .pipe-step {
-      min-height: 118px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: linear-gradient(180deg, #fff, var(--panel-soft));
-      padding: 16px;
-    }
-
+    .feature-media { overflow: hidden; padding: 0; }
+    .feature-media img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-bottom: 1px solid var(--line); }
+    .feature-media .caption { padding: 18px; }
+    .pipeline { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+    .pipe-step { min-height: 126px; border: 1px solid var(--line); border-radius: 8px; background: linear-gradient(180deg, #fff, var(--panel-soft)); padding: 16px; }
     .pipe-step span { color: var(--green-dark); font-weight: 900; font-size: 13px; }
     .pipe-step strong { display: block; margin-top: 10px; line-height: 1.35; }
-
-    .feature-media {
-      overflow: hidden;
-      padding: 0;
-    }
-
-    .feature-media img {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .feature-media .caption { padding: 18px; }
-
-    .architecture {
-      display: grid;
-      grid-template-columns: .9fr 1.1fr;
-      gap: 24px;
-      align-items: center;
-    }
-
+    .pipe-step small { display: block; margin-top: 7px; color: var(--muted); line-height: 1.45; }
+    .about-box, .summary-box { border: 1px solid var(--line); border-radius: 8px; padding: clamp(24px, 4vw, 38px); background: linear-gradient(135deg, #ffffff, #eef5ef); box-shadow: var(--shadow); }
+    .about-box { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 24px; align-items: center; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .tag { border: 1px solid rgba(47, 125, 76, .22); border-radius: 999px; padding: 5px 10px; color: var(--green-dark); background: rgba(47, 125, 76, .08); font-size: 13px; font-weight: 700; }
+    .flow { display: grid; gap: 12px; }
+    .flow-row { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 16px; align-items: start; border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 16px; }
+    .flow-row strong { color: var(--green-dark); }
+    .flow-row p { margin: 0; color: var(--muted); }
+    .role-list { display: grid; gap: 10px; }
+    .role-item { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; align-items: start; padding: 14px; border-radius: 8px; background: var(--panel-soft); border: 1px solid var(--line); }
+    .role-item b { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; background: var(--green); color: white; }
+    .role-item p { margin: 0; color: var(--muted); }
+    .arch { display: grid; grid-template-columns: .95fr 1.05fr; gap: 24px; align-items: center; }
+    .arch img { border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); }
     .arch-list { display: grid; gap: 12px; }
-    .arch-item {
-      border-left: 4px solid var(--green);
-      background: var(--panel-soft);
-      padding: 14px 16px;
-      border-radius: 0 8px 8px 0;
-    }
+    .arch-item { border-left: 4px solid var(--green); background: var(--panel-soft); padding: 14px 16px; border-radius: 0 8px 8px 0; }
     .arch-item strong { display: block; }
     .arch-item span { color: var(--muted); font-size: 14px; }
-
-    .about-box {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 320px;
-      gap: 24px;
-      align-items: center;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: clamp(24px, 4vw, 38px);
-      background: linear-gradient(135deg, #ffffff, #eef5ef);
-      box-shadow: var(--shadow);
-    }
-
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 18px;
-    }
-
-    .tag {
-      border: 1px solid rgba(47, 125, 76, .22);
-      border-radius: 999px;
-      padding: 5px 10px;
-      color: var(--green-dark);
-      background: rgba(47, 125, 76, .08);
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .footer {
-      padding: 28px clamp(18px, 4vw, 64px);
-      border-top: 1px solid var(--line);
-      color: var(--muted);
-      background: #fff;
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    @media (max-width: 980px) {
-      .hero, .architecture, .about-box { grid-template-columns: 1fr; }
-      .pipeline { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .grid.cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
-
-    @media (max-width: 680px) {
-      .nav { position: static; align-items: flex-start; flex-direction: column; }
-      .nav-links { justify-content: flex-start; }
-      .hero { min-height: auto; padding-top: 38px; }
-      .grid.cols-3, .grid.cols-2, .pipeline, .stats { grid-template-columns: 1fr; }
-      .button { width: 100%; }
-    }
+    .quote { font-size: clamp(20px, 3vw, 30px); line-height: 1.5; margin: 0; color: #203728; }
+    .footer { padding: 28px clamp(18px, 4vw, 64px); border-top: 1px solid var(--line); color: var(--muted); background: #fff; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    @media (max-width: 1080px) { .pipeline { grid-template-columns: repeat(3, minmax(0, 1fr)); } .cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 920px) { .hero, .about-box, .arch { grid-template-columns: 1fr; } .cols-3, .cols-2 { grid-template-columns: 1fr; } }
+    @media (max-width: 680px) { .nav { position: static; align-items: flex-start; flex-direction: column; } .nav-links { justify-content: flex-start; } .hero { min-height: auto; padding-top: 38px; } .pipeline, .stats, .cols-4 { grid-template-columns: 1fr; } .button { width: 100%; } .flow-row { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <nav class="nav">
     <a class="brand" href="#top"><span class="brand-mark">Ag</span><span>smartAgri</span></a>
     <div class="nav-links">
-      <a href="#about">About</a>
-      <a href="#features">功能</a>
-      <a href="#ai">AI 助手</a>
-      <a href="#architecture">架构</a>
-      <a href="project-introduction.html">项目介绍</a>
-      <a href="https://github.com/HYPlive/smartAgri">GitHub</a>
+      <a href="#about">项目介绍</a><a href="#work">我的工作</a><a href="#features">核心功能</a><a href="#ai">AI Agent</a><a href="#tech">技术难点</a><a href="project-introduction.html">完整文档</a><a href="https://github.com/HYPlive/smartAgri">GitHub</a>
     </div>
   </nav>
 
   <header class="hero" id="top">
     <div>
-      <div class="eyebrow">精准农业 · 遥感监测 · 巡田决策</div>
+      <div class="eyebrow">精准农业 · 遥感监测 · 巡田决策 · AI Agent</div>
       <h1>农田智能监测与巡田决策平台</h1>
-      <p class="hero-subtitle">围绕地块管理、遥感影像处理、异常检测、巡田工单调度、路径规划和 AI 助手，构建从农田数据采集到巡田决策输出的完整业务闭环。</p>
-      <div class="hero-actions">
-        <a class="button primary" href="project-introduction.html">查看完整项目介绍</a>
-        <a class="button secondary" href="https://github.com/HYPlive/smartAgri">打开 GitHub 仓库</a>
-      </div>
+      <p class="hero-subtitle">一个围绕农田地块全生命周期管理的综合系统：从地块圈定、遥感影像裁剪、异常识别，到巡田工单生成、路径规划和 AI 辅助问答，形成可落地的农田监测与巡田决策闭环。</p>
+      <div class="hero-actions"><a class="button primary" href="project-introduction.html">查看完整项目介绍</a><a class="button secondary" href="https://github.com/HYPlive/smartAgri">打开 GitHub 仓库</a></div>
     </div>
-    <div class="hero-panel">
-      <div class="screen-frame">
-        <img src="images/我的桌面.png" alt="系统工作台截图">
-      </div>
-      <div class="stats">
-        <div class="stat"><strong>6+</strong><span>核心业务模块</span></div>
-        <div class="stat"><strong>5</strong><span>AI 工具调用能力</span></div>
-        <div class="stat"><strong>2D/3D</strong><span>地图可视化</span></div>
-      </div>
+    <div>
+      <div class="screen-frame"><img src="images/我的桌面.png" alt="系统工作台截图"></div>
+      <div class="stats"><div class="stat"><strong>6+</strong><span>核心业务模块</span></div><div class="stat"><strong>5</strong><span>AI 工具能力</span></div><div class="stat"><strong>2D/3D</strong><span>地图可视化</span></div></div>
     </div>
   </header>
 
@@ -359,86 +110,101 @@
       <div class="about-box">
         <div>
           <p class="section-kicker">ABOUT PROJECT</p>
-          <h2>面向精准农业的全流程监测与巡田决策系统</h2>
-          <p>项目以地块为核心数据对象，结合二维地图编辑、三维场景展示、遥感影像裁剪、农田异常识别、巡田工单和 AI Agent 助手，实现“地块圈定 -> 影像裁剪 -> 异常识别 -> 工单生成 -> 路径规划 -> AI 辅助决策”的闭环。</p>
-          <div class="tags">
-            <span class="tag">Spring Boot</span><span class="tag">MySQL</span><span class="tag">Leaflet</span><span class="tag">Cesium</span><span class="tag">Python Flask</span><span class="tag">Function Calling</span><span class="tag">SSE</span>
-          </div>
+          <h2>解决农田监测中“看得见、查得到、能派单、可执行”的问题</h2>
+          <p>传统巡田依赖人工经验，地块分布、遥感影像、异常结果和巡检任务之间常常割裂。这个项目将地块作为核心数据对象，把地图圈地、遥感处理、异常检测、工单调度、路径规划和 AI 助手整合到一个系统里，让异常从“检测结果”变成“可执行任务”。</p>
+          <div class="tags"><span class="tag">Spring Boot</span><span class="tag">MySQL</span><span class="tag">Leaflet</span><span class="tag">Cesium</span><span class="tag">Python Flask</span><span class="tag">Function Calling</span><span class="tag">SSE</span></div>
         </div>
-        <div>
-          <a class="button primary" href="project-introduction.html">项目介绍页面</a>
+        <div class="role-list">
+          <div class="role-item"><b>1</b><p>面向管理端和用户端设计地块管理、查询、编辑、定位和巡田相关接口。</p></div>
+          <div class="role-item"><b>2</b><p>集成 Python Flask 计算服务，支撑遥感影像裁剪、异常检测和路径规划。</p></div>
+          <div class="role-item"><b>3</b><p>接入 AI Agent 和管理员地块问答，让自然语言可以直接查询业务数据。</p></div>
         </div>
       </div>
     </section>
 
     <section class="section alt">
-      <div class="section-head">
-        <p class="section-kicker">BUSINESS LOOP</p>
-        <h2>从地块到巡田任务的业务闭环</h2>
-        <p>系统不是单点功能堆叠，而是围绕农田管理流程，把空间数据、遥感分析、异常处理和巡田执行串联起来。</p>
+      <div class="section-head"><p class="section-kicker">WHY THIS PROJECT</p><h2>项目痛点与解决思路</h2><p>页面里不只展示功能，也说明为什么这样设计，以及系统如何把农业场景中的碎片化数据组织成闭环。</p></div>
+      <div class="grid cols-4">
+        <article class="card"><span class="num">PAIN 01</span><h3>地块数据分散</h3><p>地块边界、作物、土壤、灌溉和地址信息如果只靠表格维护，难以和地图空间位置形成联动。</p></article>
+        <article class="card"><span class="num">PAIN 02</span><h3>遥感影像体积大</h3><p>整幅 GeoTIFF 传输和渲染成本高，需要按地块边界裁剪后再按需展示。</p></article>
+        <article class="card"><span class="num">PAIN 03</span><h3>异常结果难执行</h3><p>检测结果如果没有转成工单和路线，只能停留在分析层，无法指导巡田任务。</p></article>
+        <article class="card"><span class="num">PAIN 04</span><h3>查询依赖人工筛选</h3><p>管理员需要通过自然语言快速查询地块和异常信息，而不是反复组合筛选条件。</p></article>
       </div>
+    </section>
+
+    <section class="section" id="work">
+      <div class="section-head"><p class="section-kicker">MY RESPONSIBILITY</p><h2>我在项目中的核心工作</h2><p>项目展示页面向简历和面试，因此单独标出个人负责内容，让面试官能快速看到技术贡献。</p></div>
+      <div class="grid cols-3">
+        <article class="card"><span class="num">BACKEND</span><h3>业务接口与数据建模</h3><p>负责用户管理、地块管理、巡田管理等核心接口开发，围绕地块、异常记录、巡田工单组织业务数据。</p></article>
+        <article class="card"><span class="num">MAP</span><h3>地图与空间数据交互</h3><p>基于 Leaflet 和 Cesium 实现地块圈定、定位、空间展示和二维/三维地图联动。</p></article>
+        <article class="card"><span class="num">PYTHON</span><h3>Flask 算法服务集成</h3><p>通过 Flask 接入遥感影像裁剪、异常检测、巡田路径规划等计算能力，实现 Java 业务层与 Python 计算层解耦。</p></article>
+        <article class="card"><span class="num">AI</span><h3>AI Agent 工具调用</h3><p>通过 Function Calling 暴露业务工具，使大模型可以查询地块、获取异常工单、触发检测并生成巡田路线。</p></article>
+        <article class="card"><span class="num">SSE</span><h3>流式输出与过程展示</h3><p>采用 SSE 返回 AI 回复和 Agent 执行过程，让前端能实时展示工具调用、结果摘要和最终答复。</p></article>
+        <article class="card"><span class="num">PLOT QA</span><h3>管理员地块问答</h3><p>在地块列表和地图页面接入 AI 聊天入口，支持“查某地区地块”“统计面积”“按作物筛选”等问答。</p></article>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <div class="section-head"><p class="section-kicker">BUSINESS LOOP</p><h2>从地块圈定到巡田任务输出的闭环</h2><p>平台将空间数据、遥感处理、异常识别和巡田执行串联起来，避免“只检测、不落地”。</p></div>
       <div class="pipeline">
-        <div class="pipe-step"><span>01</span><strong>地块圈定</strong></div>
-        <div class="pipe-step"><span>02</span><strong>影像裁剪</strong></div>
-        <div class="pipe-step"><span>03</span><strong>异常检测</strong></div>
-        <div class="pipe-step"><span>04</span><strong>工单生成</strong></div>
-        <div class="pipe-step"><span>05</span><strong>路线规划</strong></div>
-        <div class="pipe-step"><span>06</span><strong>AI 决策辅助</strong></div>
+        <div class="pipe-step"><span>01</span><strong>地块圈定</strong><small>保存边界坐标和地块属性</small></div>
+        <div class="pipe-step"><span>02</span><strong>影像裁剪</strong><small>按地块边界处理 GeoTIFF</small></div>
+        <div class="pipe-step"><span>03</span><strong>异常检测</strong><small>识别长势或区域异常</small></div>
+        <div class="pipe-step"><span>04</span><strong>工单生成</strong><small>将异常结果转为巡田任务</small></div>
+        <div class="pipe-step"><span>05</span><strong>路线规划</strong><small>生成可执行巡田路径</small></div>
+        <div class="pipe-step"><span>06</span><strong>AI 辅助</strong><small>问答、分析和决策建议</small></div>
       </div>
     </section>
 
     <section class="section" id="features">
-      <div class="section-head">
-        <p class="section-kicker">FEATURES</p>
-        <h2>核心功能模块</h2>
-        <p>覆盖农业平台后台管理、地图交互、遥感数据处理和巡田任务输出。</p>
-      </div>
+      <div class="section-head"><p class="section-kicker">FEATURES WITH SCREENSHOTS</p><h2>核心功能截图与说明</h2><p>用真实界面展示项目功能，避免项目介绍停留在文字层面。</p></div>
       <div class="grid cols-3">
-        <article class="card feature-media"><img src="images/AI圈地.png" alt="AI 圈地截图"><div class="caption"><span class="num">01</span><h3>地块管理与 AI 圈地</h3><p>支持地块边界绘制、信息维护、地图定位和 AI 辅助圈地，统一管理地块空间数据。</p></div></article>
-        <article class="card feature-media"><img src="images/异常检测结果面板.png" alt="异常检测截图"><div class="caption"><span class="num">02</span><h3>遥感异常检测</h3><p>结合遥感影像与异常结果面板，辅助识别作物长势、区域异常和巡检重点。</p></div></article>
-        <article class="card feature-media"><img src="images/路径规划.png" alt="路径规划截图"><div class="caption"><span class="num">03</span><h3>巡田路径规划</h3><p>从异常工单出发生成巡田路线，减少人工筛选和重复规划成本。</p></div></article>
-        <article class="card feature-media"><img src="images/巡田任务单.png" alt="巡田任务单截图"><div class="caption"><span class="num">04</span><h3>巡田工单调度</h3><p>异常检测结果可以沉淀为巡田任务单，形成后续处理依据。</p></div></article>
-        <article class="card feature-media"><img src="images/巡田报告.png" alt="巡田报告截图"><div class="caption"><span class="num">05</span><h3>巡田报告输出</h3><p>对异常区域、巡田建议和路线结果进行结构化展示，便于汇报和执行。</p></div></article>
-        <article class="card feature-media"><img src="images/Agent农业助手.png" alt="Agent 农业助手截图"><div class="caption"><span class="num">06</span><h3>AI Agent 助手</h3><p>通过 Function Calling 调用业务工具，支持异常分析、地块查询和巡田辅助决策。</p></div></article>
+        <article class="card feature-media"><img src="images/AI圈地.png" alt="AI 圈地截图"><div class="caption"><span class="num">01</span><h3>AI 圈地与地块管理</h3><p>支持在地图上圈定地块边界，保存地块名称、作物、土壤、灌溉和地址等属性，并和后台表格数据联动。</p></div></article>
+        <article class="card feature-media"><img src="images/异常检测结果面板.png" alt="异常检测截图"><div class="caption"><span class="num">02</span><h3>遥感异常检测面板</h3><p>展示异常区域、指标结果和分析面板，让遥感处理结果可以被业务人员理解和使用。</p></div></article>
+        <article class="card feature-media"><img src="images/路径规划.png" alt="路径规划截图"><div class="caption"><span class="num">03</span><h3>巡田路径规划</h3><p>基于异常工单和空间位置生成巡田路线，减少人工判断巡检顺序的成本。</p></div></article>
+        <article class="card feature-media"><img src="images/巡田任务单.png" alt="巡田任务单截图"><div class="caption"><span class="num">04</span><h3>巡田任务单</h3><p>将异常检测结果转化为任务单，包含地块、异常类型、处理建议和巡田执行信息。</p></div></article>
+        <article class="card feature-media"><img src="images/巡田报告.png" alt="巡田报告截图"><div class="caption"><span class="num">05</span><h3>巡田报告输出</h3><p>对异常汇总、巡田建议和路线结果进行结构化展示，方便管理人员汇报和复盘。</p></div></article>
+        <article class="card feature-media"><img src="images/Agent农业助手.png" alt="Agent 农业助手截图"><div class="caption"><span class="num">06</span><h3>AI Agent 助手</h3><p>通过工具调用连接数据库和算法服务，能够回答地块查询、异常分析和巡田规划相关问题。</p></div></article>
       </div>
     </section>
 
     <section class="section alt" id="ai">
-      <div class="section-head">
-        <p class="section-kicker">AI CAPABILITY</p>
-        <h2>管理员地块问答与巡田 Agent</h2>
-        <p>AI 模块不是单纯聊天，而是将自然语言输入转换为业务工具调用，再把数据库和算法服务结果组织成可读答案。</p>
-      </div>
-      <div class="grid cols-3">
-        <article class="card"><span class="num">TOOL 01</span><h3>query_plots</h3><p>支持按地块名称、作物、地区、地址、土壤类型、灌溉方式和面积条件查询管理员地块数据。</p></article>
-        <article class="card"><span class="num">TOOL 02</span><h3>get_anomaly_records</h3><p>查询巡田异常工单列表和详情，为后续异常解释和路径规划提供上下文。</p></article>
-        <article class="card"><span class="num">TOOL 03</span><h3>trigger_anomaly_detection</h3><p>根据地块、时间范围和区域参数触发异常检测任务，适配异步处理流程。</p></article>
-        <article class="card"><span class="num">TOOL 04</span><h3>generate_patrol_route</h3><p>基于异常工单生成巡田路线，让检测结果能转化为可执行任务。</p></article>
-        <article class="card"><span class="num">STREAM</span><h3>SSE 流式输出</h3><p>前端展示 AI 回复、工具调用过程和结果摘要，提升交互反馈速度。</p></article>
-        <article class="card"><span class="num">ADMIN</span><h3>地块管理 AI 聊天</h3><p>在地块列表和地图管理页面接入聊天入口，支持管理员直接用自然语言查询地块。</p></article>
+      <div class="section-head"><p class="section-kicker">AI AGENT WORKFLOW</p><h2>AI 不是普通聊天，而是能调用业务工具的 Agent</h2><p>系统将用户问题交给大模型判断意图，再通过 Function Calling 调用业务工具，最后通过 SSE 把执行过程和结果返回前端。</p></div>
+      <div class="flow">
+        <div class="flow-row"><strong>1. 自然语言输入</strong><p>管理员提出“帮我查沽源的地块”“最近有哪些异常工单”“帮我规划巡田路线”等问题。</p></div>
+        <div class="flow-row"><strong>2. 意图识别</strong><p>LLM 根据系统提示判断是否需要查询地块、获取异常记录、触发检测或生成路线。</p></div>
+        <div class="flow-row"><strong>3. 工具调用</strong><p>调用 <code>query_plots</code>、<code>get_anomaly_records</code>、<code>trigger_anomaly_detection</code>、<code>generate_patrol_route</code> 等业务工具。</p></div>
+        <div class="flow-row"><strong>4. 结果组织</strong><p>将数据库记录、异常工单和路径结果转成自然语言回答，并补充管理建议。</p></div>
+        <div class="flow-row"><strong>5. 流式展示</strong><p>前端通过 SSE 展示 AI 回复、工具调用过程和最终结果，提升交互反馈速度。</p></div>
       </div>
     </section>
 
     <section class="section" id="architecture">
-      <div class="architecture">
-        <div>
-          <p class="section-kicker">ARCHITECTURE</p>
-          <h2>Java 业务层 + Python 计算层 + 可视化层</h2>
-          <p>平台将业务管理、空间计算和前端地图展示拆开：Spring Boot 负责权限、地块、工单和 AI 编排；Python Flask 承担遥感影像裁剪与异常检测；Leaflet 与 Cesium 完成二维编辑和三维展示。</p>
-        </div>
-        <div class="arch-list">
-          <div class="arch-item"><strong>业务服务层</strong><span>Spring Boot、JWT、MySQL、地块管理、巡田管理、AI Controller</span></div>
-          <div class="arch-item"><strong>算法计算层</strong><span>Python Flask、GeoTIFF 裁剪、异常检测、路径规划接口</span></div>
-          <div class="arch-item"><strong>可视化交互层</strong><span>HTML、JavaScript、Leaflet、Cesium、地图圈地与空间展示</span></div>
-          <div class="arch-item"><strong>AI 编排层</strong><span>Function Calling、SSE、Agent 工具调用、地块问答和巡田辅助</span></div>
-        </div>
+      <div class="arch">
+        <div><p class="section-kicker">ARCHITECTURE</p><h2>Java 业务层 + Python 计算层 + 可视化层</h2><p>Spring Boot 负责权限、地块、工单和 AI 编排；Python Flask 承担影像裁剪、异常检测和路径规划；Leaflet 与 Cesium 提供二维地块编辑和三维场景展示。</p><div class="arch-list"><div class="arch-item"><strong>Java 业务层</strong><span>Controller、Service、DAO、JWT、MySQL、AI 工具编排</span></div><div class="arch-item"><strong>Python 计算层</strong><span>Flask 接口、GeoTIFF 裁剪、异常检测、路线规划</span></div><div class="arch-item"><strong>前端可视化层</strong><span>HTML、JavaScript、Leaflet、Cesium、SSE 流式展示</span></div></div></div>
+        <img src="images/系统架构图.png" alt="系统架构图">
+      </div>
+    </section>
+
+    <section class="section alt" id="tech">
+      <div class="section-head"><p class="section-kicker">TECHNICAL HIGHLIGHTS</p><h2>技术难点与解决方案</h2><p>这些内容适合放在面试讲解中，能体现项目不是简单后台 CRUD。</p></div>
+      <div class="grid cols-2">
+        <article class="card"><h3>GeoTIFF 按地块裁剪</h3><p>影像数据体积大，直接加载整幅图会影响地图交互。通过 Flask 服务按地块边界裁剪，前端只加载需要查看的区域。</p></article>
+        <article class="card"><h3>异步巡田任务处理</h3><p>异常检测属于耗时计算，系统通过异步任务和轮询获取结果，避免主业务请求长时间阻塞。</p></article>
+        <article class="card"><h3>AI 工具调用编排</h3><p>将地块查询、异常记录、检测触发、路线规划封装成工具，让 LLM 根据用户问题自主选择调用路径。</p></article>
+        <article class="card"><h3>地图空间交互</h3><p>前端需要处理地块绘制、坐标保存、地图定位、影像叠加和三维展示，保证空间信息能直观呈现。</p></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="summary-box">
+        <p class="section-kicker">INTERVIEW SUMMARY</p>
+        <p class="quote">这是一个面向精准农业场景的全栈项目，我主要完成了业务接口、地图交互、Python 算法服务集成和 AI Agent 能力接入。项目亮点在于把遥感异常检测结果进一步转化为巡田工单和路径规划，并通过 AI 助手降低管理员查询和决策成本。</p>
+        <div class="hero-actions"><a class="button primary" href="project-introduction.html">阅读更完整的项目介绍</a><a class="button secondary" href="https://github.com/HYPlive/smartAgri">查看源码仓库</a></div>
       </div>
     </section>
   </main>
 
-  <footer class="footer">
-    <span>农田智能监测与巡田决策平台</span>
-    <span><a href="project-introduction.html">项目介绍</a> · <a href="https://github.com/HYPlive/smartAgri">GitHub</a></span>
-  </footer>
+  <footer class="footer"><span>农田智能监测与巡田决策平台</span><span><a href="project-introduction.html">完整项目介绍</a> · <a href="https://github.com/HYPlive/smartAgri">GitHub</a></span></footer>
 </body>
 </html>

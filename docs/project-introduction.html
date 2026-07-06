@@ -3,100 +3,175 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>项目介绍 | 农田智能监测与巡田决策平台</title>
-  <meta name="description" content="农田智能监测与巡田决策平台项目介绍，包含项目背景、核心功能、技术架构、AI 能力和项目亮点。">
+  <title>完整项目介绍 | 农田智能监测与巡田决策平台</title>
+  <meta name="description" content="农田智能监测与巡田决策平台完整项目介绍，包含业务背景、架构设计、核心模块、AI Agent、地块问答、巡田闭环和技术难点。">
   <style>
-    :root { --ink:#17211b; --muted:#5b6a60; --line:#d8dfd6; --bg:#f5f7f3; --green:#2f7d4c; --cyan:#247f8f; --panel:#fff; }
+    :root { --ink:#17211b; --muted:#5b6a60; --line:#d8dfd6; --bg:#f5f7f3; --green:#2f7d4c; --green-dark:#1f5d3b; --cyan:#247f8f; --panel:#fff; --soft:#eef5ef; --amber:#b66b24; }
     * { box-sizing: border-box; }
     body { margin:0; font-family: Inter, "Microsoft YaHei", "PingFang SC", Arial, sans-serif; color:var(--ink); background:var(--bg); line-height:1.75; }
-    a { color:var(--green); text-decoration:none; font-weight:700; }
-    header { padding:52px clamp(18px, 5vw, 72px); background:linear-gradient(90deg, rgba(245,247,243,.96), rgba(245,247,243,.72)), url("images/系统架构图.png") center / cover no-repeat; border-bottom:1px solid var(--line); }
-    main { width:min(1080px, calc(100% - 36px)); margin:0 auto; padding:38px 0 72px; }
-    h1 { margin:0; max-width:860px; font-size:clamp(34px, 5vw, 62px); line-height:1.12; letter-spacing:0; }
-    .lead { max-width:820px; margin:18px 0 0; font-size:19px; color:#34453a; }
-    .back { display:inline-flex; margin-bottom:22px; color:#1f5d3b; }
-    section { margin-top:24px; padding:28px; background:var(--panel); border:1px solid var(--line); border-radius:8px; }
-    h2 { margin:0 0 12px; font-size:28px; letter-spacing:0; }
-    h3 { margin:20px 0 8px; font-size:20px; }
+    a { color:var(--green-dark); text-decoration:none; font-weight:800; }
+    img { max-width:100%; display:block; }
+    header { padding:52px clamp(18px, 5vw, 72px); background:linear-gradient(90deg, rgba(245,247,243,.97), rgba(245,247,243,.72)), url("images/系统架构图.png") center / cover no-repeat; border-bottom:1px solid var(--line); }
+    main { width:min(1120px, calc(100% - 36px)); margin:0 auto; padding:34px 0 78px; }
+    .back { display:inline-flex; margin-bottom:22px; }
+    h1 { margin:0; max-width:900px; font-size:clamp(34px, 5vw, 64px); line-height:1.12; letter-spacing:0; }
+    .lead { max-width:860px; margin:18px 0 0; font-size:19px; color:#34453a; }
+    .tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+    .tag { border:1px solid rgba(47,125,76,.22); border-radius:999px; padding:5px 10px; background:rgba(47,125,76,.08); color:var(--green-dark); font-size:13px; font-weight:800; }
+    section { margin-top:22px; padding:28px; background:var(--panel); border:1px solid var(--line); border-radius:8px; }
+    h2 { margin:0 0 12px; font-size:30px; line-height:1.22; letter-spacing:0; }
+    h3 { margin:20px 0 8px; font-size:21px; }
     p { margin:0 0 12px; color:var(--muted); }
     ul { margin:8px 0 0; padding-left:22px; color:var(--muted); }
-    li { margin:6px 0; }
-    .grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px; }
-    .item { border-left:4px solid var(--green); padding:12px 14px; background:#eef5ef; border-radius:0 8px 8px 0; }
-    .item strong { display:block; color:var(--ink); }
-    .tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
-    .tag { border:1px solid rgba(47,125,76,.22); border-radius:999px; padding:5px 10px; background:rgba(47,125,76,.08); color:#1f5d3b; font-size:13px; font-weight:700; }
-    .hero-img { margin-top:20px; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#fff; }
-    .hero-img img { width:100%; display:block; }
-    code { background:#eef5ef; padding:2px 5px; border-radius:4px; color:#1f5d3b; }
-    @media (max-width: 760px) { .grid { grid-template-columns:1fr; } section { padding:20px; } }
+    li { margin:7px 0; }
+    code { background:var(--soft); padding:2px 5px; border-radius:4px; color:var(--green-dark); }
+    .grid { display:grid; gap:16px; }
+    .cols-2 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .cols-3 { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .item { border-left:4px solid var(--green); padding:14px 16px; background:var(--soft); border-radius:0 8px 8px 0; }
+    .item strong { display:block; color:var(--ink); margin-bottom:4px; }
+    .card { border:1px solid var(--line); border-radius:8px; padding:20px; background:#fff; }
+    .card h3 { margin-top:0; }
+    .num { color:var(--amber); font-size:13px; font-weight:900; }
+    .image { margin-top:16px; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#fff; }
+    .image img { width:100%; }
+    .flow { display:grid; gap:10px; margin-top:14px; }
+    .flow-row { display:grid; grid-template-columns:160px minmax(0,1fr); gap:16px; padding:14px; border:1px solid var(--line); border-radius:8px; background:var(--soft); }
+    .flow-row strong { color:var(--green-dark); }
+    .flow-row p { margin:0; }
+    table { width:100%; border-collapse:collapse; margin-top:12px; overflow:hidden; border-radius:8px; }
+    th, td { border:1px solid var(--line); text-align:left; padding:12px; vertical-align:top; }
+    th { background:var(--soft); color:var(--green-dark); }
+    td { color:var(--muted); background:#fff; }
+    .summary { background:linear-gradient(135deg,#fff,var(--soft)); }
+    .summary p { font-size:18px; color:#263b2c; }
+    @media (max-width: 820px) { .cols-2,.cols-3 { grid-template-columns:1fr; } section { padding:20px; } .flow-row { grid-template-columns:1fr; } table { font-size:14px; } }
   </style>
 </head>
 <body>
   <header>
     <a class="back" href="index.html">返回项目首页</a>
-    <h1>农田智能监测与巡田决策平台</h1>
-    <p class="lead">面向精准农业的农田监测与巡田决策系统，围绕地块管理、遥感影像处理、异常检测、巡田工单调度、路径规划和 AI 助手构建完整业务闭环。</p>
-    <div class="tags"><span class="tag">Spring Boot</span><span class="tag">MySQL</span><span class="tag">Leaflet</span><span class="tag">Cesium</span><span class="tag">Python Flask</span><span class="tag">Function Calling</span><span class="tag">SSE</span></div>
+    <h1>农田智能监测与巡田决策平台完整项目介绍</h1>
+    <p class="lead">该项目面向精准农业场景，围绕“地块圈定、遥感影像处理、异常检测、巡田工单调度、路径规划和 AI 助手”构建一套农田监测与巡田决策系统。</p>
+    <div class="tags"><span class="tag">Spring Boot</span><span class="tag">MySQL</span><span class="tag">Leaflet</span><span class="tag">Cesium</span><span class="tag">Python Flask</span><span class="tag">Function Calling</span><span class="tag">SSE</span><span class="tag">AI Agent</span></div>
   </header>
 
   <main>
     <section>
-      <h2>项目背景</h2>
-      <p>传统农田管理依赖人工巡检和经验判断，地块信息、遥感影像、异常检测结果与巡田任务之间缺少统一流转。该项目以地块为核心对象，将地图圈地、影像处理、异常检测、工单生成和路线规划串联起来，提升农田监测和巡田任务生成效率。</p>
-      <div class="hero-img"><img src="images/路径规划.png" alt="巡田路径规划界面"></div>
+      <h2>1. 项目背景</h2>
+      <p>农田管理中，地块位置、作物信息、遥感影像、异常检测结果和巡田任务通常分散在不同系统或人工流程中。管理人员即使发现异常，也需要再手动查找地块、确认联系人、安排巡田路线，效率较低。</p>
+      <p>本项目以地块为核心对象，将地图空间数据、遥感影像处理、异常检测和巡田调度串联起来，让系统不仅能“发现问题”，还可以继续生成工单、规划路线，并通过 AI 助手辅助查询和决策。</p>
     </section>
 
     <section>
-      <h2>核心功能</h2>
-      <div class="grid">
-        <div class="item"><strong>地块管理</strong><span>支持地块新增、编辑、查询、地图定位、边界坐标保存和地块属性维护。</span></div>
-        <div class="item"><strong>二维与三维可视化</strong><span>基于 Leaflet 和 Cesium 展示地块、影像、空间位置和三维场景。</span></div>
-        <div class="item"><strong>遥感影像处理</strong><span>通过 Python Flask 服务按地块边界裁剪 GeoTIFF 影像，避免整幅影像传输。</span></div>
-        <div class="item"><strong>异常检测与工单</strong><span>对遥感结果进行异常识别，并生成巡田任务单和巡田报告。</span></div>
-        <div class="item"><strong>巡田路径规划</strong><span>根据异常工单和地块位置生成巡田路线，辅助任务执行。</span></div>
-        <div class="item"><strong>AI 助手</strong><span>集成 Function Calling 与 SSE，支持地块问答、异常分析和巡田辅助决策。</span></div>
+      <h2>2. 业务流程</h2>
+      <div class="flow">
+        <div class="flow-row"><strong>地块圈定</strong><p>用户或管理员在地图上绘制地块边界，保存坐标、面积、作物、土壤、灌溉、联系人和地址等信息。</p></div>
+        <div class="flow-row"><strong>影像裁剪</strong><p>系统将地块边界提交给 Python Flask 服务，对 GeoTIFF 遥感影像进行按需裁剪，减少整幅影像传输和渲染压力。</p></div>
+        <div class="flow-row"><strong>异常检测</strong><p>对裁剪后的影像或指定区域执行异常检测，识别可能存在长势异常、缺水、病虫害等风险的区域。</p></div>
+        <div class="flow-row"><strong>工单生成</strong><p>将异常检测结果转化为巡田任务单，记录异常类型、地块名称、建议处理方式和相关图片。</p></div>
+        <div class="flow-row"><strong>路径规划</strong><p>根据异常工单和空间位置生成巡田路线，让巡田任务具备可执行路径。</p></div>
+        <div class="flow-row"><strong>AI 辅助</strong><p>管理员可通过 AI 对话查询地块、分析异常、触发检测和生成巡田路线，降低操作门槛。</p></div>
       </div>
     </section>
 
     <section>
-      <h2>AI 能力</h2>
-      <p>系统 AI 模块采用大模型对话 + 工具调用的方式，不只是普通聊天。管理员可以在地块管理页面使用自然语言查询地块，例如“帮我查一下沽源的地块”“有哪些种植玉米的地块”“面积最大的地块是哪块”。</p>
-      <ul>
-        <li><code>query_plots</code>：按地块名称、地区、地址、作物、土壤类型、灌溉方式和面积范围查询地块。</li>
-        <li><code>get_anomaly_records</code>：查询巡田异常工单列表和详情。</li>
-        <li><code>trigger_anomaly_detection</code>：触发异常检测任务。</li>
-        <li><code>generate_patrol_route</code>：基于异常工单生成巡田路径。</li>
-        <li>SSE 流式输出：前端展示 AI 回复、Agent 执行过程和工具调用结果。</li>
-      </ul>
+      <h2>3. 系统架构</h2>
+      <p>项目采用“Java 业务层 + Python 计算层 + 前端可视化层 + MySQL 数据层”的分层结构，实现业务管理和算法计算解耦。</p>
+      <div class="grid cols-2">
+        <div class="item"><strong>Java 业务层</strong>Spring Boot 负责用户管理、地块管理、巡田管理、AI 接口、权限校验和数据库访问。</div>
+        <div class="item"><strong>Python 计算层</strong>Flask 提供遥感影像裁剪、异常检测和路径规划等计算接口。</div>
+        <div class="item"><strong>前端可视化层</strong>HTML、JavaScript、Leaflet、Cesium 实现地图圈地、二维展示、三维可视化和 AI 聊天窗口。</div>
+        <div class="item"><strong>数据存储层</strong>MySQL 存储用户、管理员地块、用户地块、巡田工单、异常记录和业务配置。</div>
+      </div>
+      <div class="image"><img src="images/系统架构图.png" alt="系统架构图"></div>
     </section>
 
     <section>
-      <h2>技术架构</h2>
-      <p>项目采用“Java 业务层 + Python 计算层 + 可视化层”的分层架构。</p>
-      <ul>
-        <li>Java 业务层：Spring Boot 负责用户管理、地块管理、巡田管理、权限校验、AI 接口和数据库访问。</li>
-        <li>Python 计算层：Flask 提供遥感影像裁剪、异常检测、路径规划等计算接口。</li>
-        <li>前端可视化层：HTML、JavaScript、Leaflet、Cesium 实现地图交互、二维圈地和三维展示。</li>
-        <li>数据层：MySQL 存储用户、地块、工单、巡田记录和业务数据。</li>
-      </ul>
+      <h2>4. 核心模块</h2>
+      <table>
+        <thead><tr><th>模块</th><th>实现内容</th><th>项目价值</th></tr></thead>
+        <tbody>
+          <tr><td>地块管理</td><td>地块增删改查、边界坐标、面积、作物、土壤、灌溉、联系人和地址维护。</td><td>建立统一地块数据底座。</td></tr>
+          <tr><td>地图交互</td><td>Leaflet 支持二维圈地、定位和空间查看；Cesium 支持三维场景可视化。</td><td>让地块信息具备空间表达能力。</td></tr>
+          <tr><td>遥感处理</td><td>Flask 服务按地块边界裁剪 GeoTIFF，返回裁剪结果和可视化影像。</td><td>降低影像传输和前端渲染压力。</td></tr>
+          <tr><td>异常检测</td><td>对地块或区域进行异常识别，生成异常面板和异常记录。</td><td>从人工巡查转向数据驱动发现问题。</td></tr>
+          <tr><td>巡田管理</td><td>异常结果生成巡田任务单、巡田报告，并支持路径规划。</td><td>将检测结果转化为可执行任务。</td></tr>
+          <tr><td>AI 助手</td><td>Function Calling 工具调用、SSE 流式输出、管理员地块问答和巡田辅助。</td><td>降低系统使用门槛，提高查询和决策效率。</td></tr>
+        </tbody>
+      </table>
     </section>
 
     <section>
-      <h2>项目亮点</h2>
-      <ul>
-        <li>围绕农田业务形成“地块圈定 -> 影像裁剪 -> 异常识别 -> 工单生成 -> 路径规划”的闭环。</li>
-        <li>通过 GeoTIFF 按需裁剪减少影像传输体积，提升地图加载和交互体验。</li>
-        <li>通过异步巡田任务处理机制获取异常检测结果，降低长耗时任务对主业务流程的阻塞。</li>
-        <li>基于 Function Calling 构建 AI Agent，使大模型能够调用业务工具查询地块、分析异常并生成巡田建议。</li>
-        <li>管理员地块 AI 问答已接入地块列表和地图管理页面，能够直接服务实际管理场景。</li>
-      </ul>
+      <h2>5. AI Agent 能力</h2>
+      <p>AI 模块采用大模型对话 + Function Calling 的方式，将业务能力封装为工具，让大模型根据用户问题选择合适工具，而不是只生成通用回答。</p>
+      <div class="grid cols-3">
+        <div class="card"><span class="num">query_plots</span><h3>地块查询工具</h3><p>按地块名称、地区、地址、作物、土壤、灌溉方式、土地类型和面积范围查询地块。</p></div>
+        <div class="card"><span class="num">get_anomaly_records</span><h3>异常工单查询</h3><p>查询巡田异常工单列表和详情，为异常解释和路径规划提供上下文。</p></div>
+        <div class="card"><span class="num">trigger_anomaly_detection</span><h3>触发异常检测</h3><p>根据地块、日期范围和区域参数触发异常检测任务。</p></div>
+        <div class="card"><span class="num">generate_patrol_route</span><h3>生成巡田路线</h3><p>基于异常工单生成巡田路径，形成执行方案。</p></div>
+        <div class="card"><span class="num">explain_anomaly</span><h3>异常解释</h3><p>结合异常类别和地块信息输出可能原因、影响和巡田建议。</p></div>
+        <div class="card"><span class="num">SSE</span><h3>流式过程展示</h3><p>前端实时展示 AI 回复和 Agent 工具调用过程，增强交互反馈。</p></div>
+      </div>
+      <div class="image"><img src="images/Agent农业助手.png" alt="AI Agent 农业助手"></div>
     </section>
 
     <section>
-      <h2>仓库与访问</h2>
+      <h2>6. 管理员地块 AI 问答</h2>
+      <p>管理员地块问答是项目后续补充的重要能力，已经接入地块列表和地图管理页面。它的目标是让管理员不用手动组合筛选条件，也能通过自然语言查询地块数据。</p>
+      <h3>可支持的问题示例</h3>
+      <ul>
+        <li>“帮我查一下沽源的地块。”</li>
+        <li>“有哪些种植玉米的地块？”</li>
+        <li>“面积最大的地块是哪一块？”</li>
+        <li>“系统里一共有多少亩地？”</li>
+        <li>“砂质土并且渠灌的地块有哪些？”</li>
+      </ul>
+      <h3>实现方式</h3>
+      <p>后端通过地块查询工具统一封装数据库查询能力，AI 根据用户输入抽取地区、作物、面积、土壤、灌溉等条件，再调用工具获取真实数据。工具返回后，AI 再组织成自然语言答案。如果查询结果为空，系统明确说明数据库中没有查到，而不是编造结果。</p>
+    </section>
+
+    <section>
+      <h2>7. 巡田任务闭环</h2>
+      <p>巡田模块的重点不是单独展示异常，而是把异常检测结果继续向下游任务推进。</p>
+      <div class="grid cols-3">
+        <div class="card"><h3>异常识别</h3><p>从遥感影像或地块数据中识别风险区域，形成异常记录。</p></div>
+        <div class="card"><h3>工单沉淀</h3><p>将异常记录转化为巡田任务单，包含地块、联系人、异常类型和处理建议。</p></div>
+        <div class="card"><h3>路线输出</h3><p>基于异常地块位置生成巡田路线，辅助巡田人员安排巡检顺序。</p></div>
+      </div>
+      <div class="image"><img src="images/巡田任务单.png" alt="巡田任务单"></div>
+    </section>
+
+    <section>
+      <h2>8. 技术难点与解决方案</h2>
+      <table>
+        <thead><tr><th>难点</th><th>问题表现</th><th>解决方案</th></tr></thead>
+        <tbody>
+          <tr><td>大影像加载慢</td><td>GeoTIFF 体积大，整幅影像传输和渲染成本高。</td><td>使用 Python Flask 根据地块边界动态裁剪，前端按需加载裁剪结果。</td></tr>
+          <tr><td>长耗时检测任务</td><td>异常检测无法在普通请求中快速完成。</td><td>设计异步任务处理方式，通过轮询获取检测结果，避免阻塞主流程。</td></tr>
+          <tr><td>业务数据和 AI 结合</td><td>大模型如果直接回答容易脱离真实数据库。</td><td>通过 Function Calling 暴露业务工具，AI 必须先查真实数据再组织答案。</td></tr>
+          <tr><td>地图空间交互</td><td>地块边界、影像、定位和三维展示需要统一表达。</td><td>Leaflet 负责二维绘制和地图交互，Cesium 负责三维场景展示。</td></tr>
+          <tr><td>AI 输出体验</td><td>普通接口一次性返回，用户等待感明显。</td><td>采用 SSE 流式输出，展示 AI 回复和 Agent 执行过程。</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>9. 我的职责</h2>
+      <ul>
+        <li>负责平台核心业务设计与开发，实现用户管理、地块管理、巡田管理及相关数据接口。</li>
+        <li>基于 Leaflet 和 Cesium 实现二维地块编辑与三维场景可视化，支持圈地、查询、定位和空间信息展示。</li>
+        <li>集成 Python Flask 数据处理服务，提供遥感影像裁剪、异常检测和路径规划接口调用。</li>
+        <li>集成 AI 助手模块，通过 Function Calling 构建业务工具调用能力，并采用 SSE 实现流式输出。</li>
+        <li>补充管理员地块 AI 问答能力，使 AI 能够查询地块、统计面积、筛选作物和解释查询结果。</li>
+      </ul>
+    </section>
+
+    <section class="summary">
+      <h2>10. 项目总结</h2>
+      <p>该项目不是单纯的后台管理系统，而是把农田空间数据、遥感影像处理、异常检测、巡田任务和 AI 助手组合到一个农业业务闭环中。它体现了 Java 后端业务开发、Python 算法服务集成、地图可视化和大模型工具调用的综合实践。</p>
+      <p>在简历和面试中，可以重点强调三点：第一，系统采用 Java 业务层与 Python 计算层解耦；第二，遥感异常检测结果可以继续生成巡田工单和路径；第三，AI Agent 通过 Function Calling 调用真实业务工具，具备地块问答和巡田辅助决策能力。</p>
       <p>项目仓库：<a href="https://github.com/HYPlive/smartAgri">https://github.com/HYPlive/smartAgri</a></p>
-      <p>展示首页：<a href="index.html">农田智能监测与巡田决策平台</a></p>
     </section>
   </main>
 </body>
