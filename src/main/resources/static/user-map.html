@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
     <link rel="stylesheet" href="https://cdn.staticfile.org/layui/2.8.18/css/layui.css"/>
-    <script src="https://unpkg.com/leaflet-image/leaflet-image.js"></script>
 
     <link rel="stylesheet" href="lib/css/leaflet.css"/>
     <link rel="stylesheet" href="lib/css/leaflet.draw.css"/>
@@ -414,7 +413,26 @@
 <!--<script src="./lib/georaster/georaster.min.js"></script>
 <script src="./lib/georaster/georaster-layer-for-leaflet.min.js"></script>-->
 <script src="./lib/layui/layui.js"></script>
+<script src="https://unpkg.com/leaflet-image/leaflet-image.js"></script>
 
+
+<script>
+    // 监听窗口大小变化，刷新地图大小
+    window.addEventListener('resize', () => {
+        if (window.map && typeof window.map.invalidateSize === "function") {
+            window.map.invalidateSize();
+        }
+    });
+
+    // 页面加载完成后延迟刷新地图大小
+    window.onload = () => {
+        setTimeout(() => {
+            if (window.map && typeof window.map.invalidateSize === "function") {
+                window.map.invalidateSize();
+            }
+        }, 300);
+    }
+</script>
 
 <script>
     // ================= 全局变量 =================
@@ -426,7 +444,9 @@
     const token = localStorage.getItem('token_user');
     const ndviDataByRegion = {}; // 按地区存放 NDVI 列表
     let timeSelect = null; //全局化，用于开始圈地按钮
-    let allPolygons = []; // AI 检测的多边形
+    let allPolygons = []; // AI 检测出来的所有候选地块
+    let selectedAIPolygon = null; // 当前选中的 AI 地块
+    let aiSelectMode = false; // 是否处于 AI 选地模式
     const simplifyRange = document.getElementById("simplifyRange");
 
     // 把后端原始地块数组转成 /user/ndvicut 接口需要的格式
@@ -474,7 +494,7 @@
             currentNdviTime = null;
 
             try {
-                const res = await fetch(`http://123.56.228.32:8000/user/ndvilist?region=${region}`, {
+                const res = await fetch(`http://localhost:8000/user/ndvilist?region=${region}`, {
                     headers: {"authentication": token}
                 });
                 const ndviList = await res.json();
@@ -534,7 +554,7 @@
 
             try {
                 // 获取地块信息
-                const resPlots = await fetch('http://123.56.228.32:8080/user/plots', {
+                const resPlots = await fetch('http://localhost:8080/user/plots', {
                     headers: {"authentication": token}
                 });
                 const rawPlots = await resPlots.json();
@@ -548,7 +568,7 @@
                 requestData.region = region;
 
                 // 调用裁剪接口
-                const resCut = await fetch('http://123.56.228.32:8000/user/ndvicut', {
+                const resCut = await fetch('http://localhost:8000/user/ndvicut', {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -757,7 +777,7 @@
                         plotData.address = address;
 
                         try {
-                            const res = await fetch("http://123.56.228.32:8080/user/plots", {
+                            const res = await fetch("http://localhost:8080/user/plots", {
                                 method: "POST",
                                 headers: {
                                     "Content-Type": "application/json",
@@ -790,14 +810,50 @@
         // AI 自动圈地按钮
         const btn = document.getElementById("btnAiDraw");
         const loadingOverlay = document.getElementById("loadingOverlay");
+        const AI_TARGET_ZOOM = 16;
+
+        function waitZoomEnd(map) {
+            return new Promise(resolve => map.once("zoomend", resolve));
+        }
+
+        function resetAISelectionState() {
+            if (selectedAIPolygon && selectedAIPolygon.editing && typeof selectedAIPolygon.editing.disable === "function") {
+                selectedAIPolygon.editing.disable();
+            }
+            selectedAIPolygon = null;
+            aiSelectMode = false;
+            allPolygons.forEach(p => {
+                if (map.hasLayer(p)) {
+                    map.removeLayer(p);
+                }
+            });
+            allPolygons = [];
+            drawnItems.clearLayers();
+        }
+
         btn.onclick = async function () {
             loadingOverlay.style.display = "flex";
-            drawnItems.clearLayers();
-            allPolygons.forEach(p => map.removeLayer(p));
+            resetAISelectionState();
 
-            // 截图当前地图
+            const minZ = (typeof map.getMinZoom === "function") ? map.getMinZoom() : 0;
+            const maxZ = (typeof map.getMaxZoom === "function") ? map.getMaxZoom() : 22;
+            const targetZoom = Math.max(minZ, Math.min(maxZ, AI_TARGET_ZOOM));
+
+            console.log("[AI] zoom before:", map.getZoom(), "target:", targetZoom);
+
+            if (map.getZoom() !== targetZoom) {
+                map.setZoom(targetZoom, { animate: true });
+                await waitZoomEnd(map);
+            }
+
+            console.log("[AI] zoom after:", map.getZoom());
+
             leafletImage(map, async function (err, canvas) {
-                if (err) { alert("截图失败"); return; }
+                if (err) {
+                    loadingOverlay.style.display = "none";
+                    alert("截图失败");
+                    return;
+                }
 
                 canvas.toBlob(async function (blob) {
                     const bounds = map.getBounds();
@@ -809,34 +865,47 @@
                     ]));
 
                     try {
-                        const res = await fetch("http://123.56.228.32:8001/predict", { method: "POST", body: payload });
+                        const res = await fetch("http://localhost:8001/predict", {
+                            method: "POST",
+                            body: payload
+                        });
                         if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
                         const data = await res.json();
 
                         if (data.polygons) {
-                            // 调用简化接口
-                            const simplifyRes = await fetch("http://123.56.228.32:8003/simplify", {
+                            const simplifyRes = await fetch("http://localhost:8003/simplify", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ polygons: data.polygons, tolerance: simplifyRange.value / 100000 })
-
+                                body: JSON.stringify({
+                                    polygons: data.polygons,
+                                    tolerance: simplifyRange.value / 100000
+                                })
                             });
+
                             const simpleData = await simplifyRes.json();
+
                             allPolygons = [];
+                            selectedAIPolygon = null;
+                            aiSelectMode = true;
 
                             simpleData.simplified_polygons.forEach(latlngs => {
-                                const poly = L.polygon(latlngs, { color: "red", fillOpacity: 0.15 });
+                                const poly = L.polygon(latlngs, {
+                                    color: "red",
+                                    weight: 2,
+                                    fillOpacity: 0.15
+                                });
                                 allPolygons.push(poly);
                                 poly.addTo(map);
                             });
 
-                            alert("✅ 点击任意地块中间选择该地块！");
+                            showCustomMsg("✅ 请先点击一个识别地块进行选择，调整后再次点击该地块进入新增页面", 4000);
                         } else if (data.error) {
                             alert("AI预测出错: " + data.error);
                         }
                     } catch (err) {
                         alert("请求失败: " + err.message);
-                    }finally {
+                    } finally {
                         loadingOverlay.style.display = "none";
                     }
                 }, "image/jpeg", 0.7);
@@ -845,43 +914,55 @@
 
         // 点击地图选择单个地块
         map.on("click", function (e) {
+            if (!aiSelectMode) return;
             if (allPolygons.length === 0) return;
 
             const clickedPoint = e.latlng;
-            let selectedPolygon = null;
 
-            for (const poly of allPolygons) {
-                const latlngs = poly.getLatLngs()[0];
-                if (isPointInPolygon(clickedPoint, latlngs)) {
-                    selectedPolygon = poly;
-                    break;
+            if (!selectedAIPolygon) {
+                let hitPolygon = null;
+
+                for (const poly of allPolygons) {
+                    const latlngs = poly.getLatLngs()[0];
+                    if (isPointInPolygon(clickedPoint, latlngs)) {
+                        hitPolygon = poly;
+                        break;
+                    }
                 }
-            }
 
-            // if (selectedPolygon) {
-            //     drawnItems.clearLayers();
-            //     allPolygons.forEach(p => map.removeLayer(p));
-            //     selectedPolygon.setStyle({ color: "red", fillOpacity: 0.4 });
-            //     drawnItems.addLayer(selectedPolygon);
-            //     drawControl._toolbars.edit._modes.edit.handler.enable();
-            //     openPlotForm(selectedPolygon);
-            // }
-            if (selectedPolygon) {
-                // 清理旧图层
+                if (!hitPolygon) return;
+
+                allPolygons.forEach(p => {
+                    if (p !== hitPolygon && map.hasLayer(p)) {
+                        map.removeLayer(p);
+                    }
+                });
+
+                selectedAIPolygon = hitPolygon;
+                allPolygons = [hitPolygon];
+
                 drawnItems.clearLayers();
-                allPolygons.forEach(p => map.removeLayer(p));
 
-                // 设置选中样式
-                selectedPolygon.setStyle({ color: "red", fillOpacity: 0.4 });
-                drawnItems.addLayer(selectedPolygon);
+                selectedAIPolygon.setStyle({
+                    color: "red",
+                    weight: 3,
+                    fillOpacity: 0.35
+                });
 
-                // ✅ 启用编辑模式（安全写法）
-                enablePolygonEdit(selectedPolygon);
+                drawnItems.addLayer(selectedAIPolygon);
+                enablePolygonEdit(selectedAIPolygon);
 
-                // 打开信息填写弹窗
-                openPlotForm(selectedPolygon);
+                showCustomMsg("✅ 已选中该地块，可拖动顶点调整范围；调整完成后再次点击该地块进入新增页面", 4000);
+                return;
             }
 
+            const currentLatLngs = selectedAIPolygon.getLatLngs()[0];
+            const clickedSelectedPolygon = isPointInPolygon(clickedPoint, currentLatLngs);
+
+            if (clickedSelectedPolygon) {
+                aiSelectMode = false;
+                openPlotForm(selectedAIPolygon);
+            }
         });
     }
     // ✅ 安全启用多边形编辑模式
@@ -964,8 +1045,8 @@
                     //TODO 修改地块还有bug，到时候统一一下管理端字段名，一起改吧
 
                     try {
-                        // http://123.56.228.32:8080请求，添加token头
-                        const res = await fetch("http://123.56.228.32:8080/user/plots", {
+                        // localhost:8080请求，添加token头
+                        const res = await fetch("http://localhost:8080/user/plots", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
@@ -1011,7 +1092,7 @@
             // 2. 获取真实地块数据
             let plots;
             try {
-                const res = await fetch("http://123.56.228.32:8080/user/plots", {
+                const res = await fetch("http://localhost:8080/user/plots", {
                     method: "GET",
                     headers: {
                         "authentication": token
@@ -1144,7 +1225,7 @@
      */
     async function loadPlots() {
         try {
-            const res = await fetch("http://123.56.228.32:8080/user/plots", {
+            const res = await fetch("http://localhost:8080/user/plots", {
                 method: "GET",
                 headers: {
                     "authentication": token
@@ -1204,7 +1285,7 @@
         if (!confirm("确认删除该地块？")) return;
 
         try {
-            const res = await fetch(`http://123.56.228.32:8080/user/plots/${id}`, {
+            const res = await fetch(`http://localhost:8080/user/plots/${id}`, {
                 method: "DELETE",
                 headers: {
                     "authentication": token
@@ -1282,7 +1363,7 @@
         }
 
         try {
-            const res = await fetch(`http://123.56.228.32:8080/user/plots/${id}/area`, {
+            const res = await fetch(`http://localhost:8080/user/plots/${id}/area`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -1560,7 +1641,7 @@
 
         document.getElementById('queryPlot').onclick = async function () {
             try {
-                const res = await fetch("http://123.56.228.32:8080/user/plots", {
+                const res = await fetch("http://localhost:8080/user/plots", {
                     method: "GET",
                     headers: {
                         "authentication": token
@@ -1794,6 +1875,16 @@
 <style>
     @keyframes blink {
         50% { opacity: 0.6; }
+    }
+    .leaflet-div-icon.leaflet-editing-icon {
+        width: 12px !important;
+        height: 12px !important;
+        margin-left: -3px !important;
+        margin-top: -3px !important;
+        border-radius: 50% !important;
+        background: #00c853 !important;
+        border: 1px solid #ffffff !important;
+        box-shadow: 0 0 4px rgba(0,0,0,0.4);
     }
 </style>
 </body>

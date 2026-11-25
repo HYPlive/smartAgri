@@ -3,7 +3,7 @@ package com.example.smartAgr.model;
 
 import lombok.Data;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "admin_plots")
@@ -27,6 +27,7 @@ public class AdminPlot {
     private String coordinates;
     private Double area;
     private String address;
+    private String status = "available";
 
     // 如果你需要自定义构造器，可以保留，但无参构造器必须在
     public AdminPlot() {}

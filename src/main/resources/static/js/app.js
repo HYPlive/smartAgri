@@ -31,13 +31,13 @@ function initMap() {
                 ]));
 
                 try {
-                    const res = await fetch("http://123.56.228.32:8001/predict", { method: "POST", body: payload });
+                    const res = await fetch("localhost:8001/predict", { method: "POST", body: payload });
                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
                     const data = await res.json();
 
                     if (data.polygons) {
                         // 调用简化接口
-                        const simplifyRes = await fetch("http://123.56.228.32:8010/simplify", {
+                        const simplifyRes = await fetch("localhost:8010/simplify", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ polygons: data.polygons, tolerance: simplifyRange.value / 100000 })
@@ -137,7 +137,7 @@ function openPlotForm(poly) {
             const plotData = { name, lastCrop, currentCrop, contactPerson, phone, soilType, irrigationType, landType, shapeType: "polygon", coordinates, area };
 
             try {
-                const res = await fetch("http://123.56.228.32:8080/plots", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(plotData) });
+                const res = await fetch("localhost:8080/plots", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(plotData) });
                 if (!res.ok) throw new Error("请求失败");
                 const saved = await res.json();
                 popupWindow.close();

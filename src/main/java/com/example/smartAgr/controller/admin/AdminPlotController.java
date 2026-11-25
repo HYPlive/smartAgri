@@ -30,6 +30,9 @@ public class AdminPlotController {
 
     @PostMapping
     public AdminPlot savePlot(@RequestBody AdminPlot adminPlot) {
+        if (adminPlot.getStatus() == null || adminPlot.getStatus().isBlank()) {
+            adminPlot.setStatus("available");
+        }
         return adminPlotDao.save(adminPlot);
     }
 
@@ -84,6 +87,9 @@ public class AdminPlotController {
         adminPlot.setSoilType(newPlot.getSoilType());
         adminPlot.setIrrigationType(newPlot.getIrrigationType());
         adminPlot.setLandType(newPlot.getLandType());
+        if (newPlot.getStatus() != null && !newPlot.getStatus().isBlank()) {
+            adminPlot.setStatus(newPlot.getStatus());
+        }
         //adminPlot.setShapeType(newPlot.getShapeType());
         //adminPlot.setCoordinates(newPlot.getCoordinates());
         //adminPlot.setArea(newPlot.getArea());

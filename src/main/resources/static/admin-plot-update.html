@@ -100,6 +100,17 @@
     </div>
 
     <div class="layui-form-item">
+      <label class="layui-form-label">租赁状态</label>
+      <div class="layui-input-block">
+        <select name="status" lay-verify="required">
+          <option value="available">可租赁</option>
+          <option value="leased">已租出</option>
+          <option value="unavailable">不可租赁</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="layui-form-item">
       <label class="layui-form-label">地块面积</label>
       <div class="layui-input-block">
         <input type="text" name="area" id="areaInput" readonly class="layui-input">
@@ -123,7 +134,7 @@
         const laytpl = layui.laytpl;
 
         // 打开页面后立即弹出地块选择器
-        fetch("http://123.56.228.32:8080/admin/plots", {
+        fetch("localhost:8080/admin/plots", {
           method: 'GET',
           headers: {
             'token': localStorage.getItem('token_admin') // token 从 localStorage 获取
@@ -213,6 +224,7 @@
       document.querySelector('select[name="soilType"]').value = data.soilType;
       document.querySelector('select[name="irrigationType"]').value = data.irrigationType;
       document.querySelector('select[name="landType"]').value = data.landType;
+      document.querySelector('select[name="status"]').value = data.status || 'available';
       document.getElementById('areaInput').value = data.area + ' 亩';
       form.render();
     }

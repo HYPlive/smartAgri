@@ -138,6 +138,7 @@
                                 <th>土壤类型</th>
                                 <th>灌溉条件</th>
                                 <th>土地类型</th>
+                                <th>租赁状态</th>
                                 <th>地址</th>
                                 <th>操作</th>
                             </tr>
@@ -162,7 +163,7 @@
             console.log("收到修改地块数据：", updatedData);
 
             // 🔁 发起请求更新地块信息
-            fetch(`http://123.56.228.32:8080/admin/plots/${updatedData.id}`, {
+            fetch(`localhost:8080/admin/plots/${updatedData.id}`, {
                 method: "PUT",
                 headers: {
                     'Content-Type': 'application/json',
@@ -215,6 +216,7 @@
                     <td>${plots.soilType}</td>
                     <td>${plots.irrigationType}</td>
                     <td>${plots.landType}</td>
+                    <td>${formatStatus(plots.status)}</td>
                     <td>${plots.address || ''}</td>
                     <td>
                         <button class='layui-btn layui-btn-xs' onclick='showMap(\`${plots.coordinates}\`)'>
@@ -229,6 +231,12 @@
                 layer.msg('服务器执行错误！', {icon: 2});
             }
         });
+    }
+
+    function formatStatus(status) {
+        if (status === 'leased') return '已租出';
+        if (status === 'unavailable') return '不可租赁';
+        return '可租赁';
     }
 
 

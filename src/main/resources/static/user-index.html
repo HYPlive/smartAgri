@@ -9,10 +9,12 @@
     <meta http-equiv="Cache-Control" content="no-siteapp" />
     <link rel="stylesheet" href="./css/font.css">
     <link rel="stylesheet" href="./css/xadmin.css">
+    <link rel="stylesheet" href="./css/ai-chat.css">
 
     <script src="js/jquery.min.js"></script>
     <script src="./lib/layui/layui.js" charset="utf-8"></script>
     <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
     <!--[if lt IE 9]>
@@ -142,6 +144,30 @@
 </div>
 <!-- 左侧菜单结束 -->
 
+<!-- AI 聊天悬浮按钮 -->
+<button class="ai-chat-toggle" id="aiChatToggle" title="AI 农业助手">🤖</button>
+
+<!-- AI 聊天面板 -->
+<div class="ai-chat-panel" id="aiChatPanel" style="display:none;">
+    <div class="ai-chat-header">
+        <span>智慧农业 AI 助手</span>
+        <button id="aiChatClose">&times;</button>
+    </div>
+    <div class="ai-chat-messages" id="aiChatMessages">
+        <div class="chat-msg assistant">
+            <div class="chat-bubble">您好！我是智慧农业AI助手。<br>
+            您可以问我关于地块的任何问题，比如：<br>
+            - "我的3号地块适合种什么？"<br>
+            - "查看我的所有地块"<br>
+            - "分析一下我地块1的土壤"</div>
+        </div>
+    </div>
+    <div class="ai-chat-input-area">
+        <textarea id="aiChatInput" rows="2" placeholder="输入您的问题..."></textarea>
+        <button id="aiChatSend">发送</button>
+    </div>
+</div>
+
 <!-- 右侧主体开始 -->
 <div class="page-content">
     <div class="layui-tab tab" lay-filter="userTab" lay-allowclose="false" id="userTabs">
@@ -176,6 +202,160 @@
         const role = localStorage.getItem('role') || 'user';
         $('.layui-nav-item > a').first().text(username + ' (' + (role === 'admin' ? '管理员' : '普通用户') + ')');
     });
+</script>
+
+<!-- AI 聊天 JS -->
+<script>
+$(function() {
+    var sending = false;
+
+    $('#aiChatToggle').click(function() {
+        $('#aiChatPanel').toggle();
+        if ($('#aiChatPanel').is(':visible')) {
+            $('#aiChatInput').focus();
+        }
+    });
+    $('#aiChatClose').click(function() {
+        $('#aiChatPanel').hide();
+    });
+
+    function sendMessage() {
+        if (sending) return;
+        var input = $('#aiChatInput');
+        var message = input.val().trim();
+        if (!message) return;
+
+        var messagesDiv = $('#aiChatMessages');
+        // 显示用户消息
+        messagesDiv.append(
+            '<div class="chat-msg user"><div class="chat-bubble">' + escapeHtml(message) + '</div></div>'
+        );
+        input.val('');
+
+        // 显示 AI 打字指示器
+        var assistantMsg = $(
+            '<div class="chat-msg assistant"><div class="chat-bubble"><span class="typing-indicator"><span></span><span></span><span></span></span></div></div>'
+        );
+        messagesDiv.append(assistantMsg);
+        scrollToBottom(messagesDiv);
+
+        sending = true;
+        var token = localStorage.getItem('token_user') || '';
+        var bubble = assistantMsg.find('.chat-bubble');
+        var fullResponse = '';
+        var lineBuffer = '';
+        var eventDataLines = [];
+
+        fetch('/user/ai/chat/stream', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'authentication': token
+            },
+            body: JSON.stringify({ message: message })
+        }).then(function(response) {
+            if (!response.ok) {
+                return response.text().then(function(t) { throw new Error(t); });
+            }
+            var reader = response.body.getReader();
+            var decoder = new TextDecoder();
+            function appendToken(data) {
+                fullResponse += data;
+                if (window.marked) {
+                    bubble.html(marked.parse(normalizeMarkdown(fullResponse)));
+                } else {
+                    bubble.text(normalizeMarkdown(fullResponse));
+                }
+                scrollToBottom(messagesDiv);
+            }
+            function renderFinal() {
+                if (!fullResponse) {
+                    bubble.html('<span style="color:#999">（未收到回复）</span>');
+                    return;
+                }
+                if (window.marked) {
+                    bubble.html(marked.parse(normalizeMarkdown(fullResponse)));
+                } else {
+                    bubble.text(normalizeMarkdown(fullResponse));
+                }
+                scrollToBottom(messagesDiv);
+            }
+            function normalizeMarkdown(text) {
+                return text.replace(/^(#{1,6})([^\s#])/gm, '$1 $2');
+            }
+            function dispatchSseEvent() {
+                if (!eventDataLines.length) return false;
+                var data = eventDataLines.join('\n');
+                eventDataLines = [];
+                if (data.trim() === '[DONE]') {
+                    renderFinal();
+                    return true;
+                }
+                appendToken(data);
+                return false;
+            }
+            function handleSseLine(line) {
+                if (line === '') {
+                    return dispatchSseEvent();
+                }
+                if (line.startsWith('data:')) {
+                    var data = line.substring(5);
+                    if (data.charAt(0) === ' ') {
+                        data = data.substring(1);
+                    }
+                    eventDataLines.push(data);
+                }
+                return false;
+            }
+            (function read() {
+                reader.read().then(function(result) {
+                    if (result.done) {
+                        sending = false;
+                        if (lineBuffer) {
+                            handleSseLine(lineBuffer);
+                            lineBuffer = '';
+                        }
+                        dispatchSseEvent();
+                        renderFinal();
+                        return;
+                    }
+                    var text = lineBuffer + decoder.decode(result.value, { stream: true });
+                    var lines = text.split(/\r?\n/);
+                    lineBuffer = lines.pop();
+                    for (var i = 0; i < lines.length; i++) {
+                        if (handleSseLine(lines[i])) {
+                            sending = false;
+                        }
+                    }
+                    read();
+                }).catch(function(err) {
+                    sending = false;
+                    bubble.html('<span style="color:#e74c3c;">连接出错: ' + err.message + '</span>');
+                });
+            })();
+        }).catch(function(err) {
+            sending = false;
+            bubble.html('<span style="color:#e74c3c;">请求失败: ' + err.message + '</span>');
+        });
+    }
+
+    $('#aiChatSend').click(sendMessage);
+    $('#aiChatInput').on('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    function scrollToBottom(el) {
+        el.scrollTop(el[0].scrollHeight);
+    }
+});
 </script>
 
 </body>
